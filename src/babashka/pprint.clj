@@ -2834,7 +2834,7 @@ nil
       (format-error "Format string ended in the middle of a directive" offset))
     (if (not def)
       (format-error (str "Directive \"" directive "\" is undefined") offset))
-    [(struct compiled-directive ((:generator-fn def) params offset) def params offset)
+    [(struct compiled-directive ((:generator-fn def) params offset) nil #_def nil #_params nil #_offset)
      (let [remainder (subs rest 1)
            offset (inc offset)
            trim? (and (= \newline (:directive def))
@@ -2969,8 +2969,8 @@ nil
            (let [tilde (.indexOf s (int \~))]
              (cond
                (neg? tilde) [(compile-raw-string s offset) ["" (+ offset (.length s))]]
-               (zero? tilde)  (compile-directive (subs s 1) (inc offset))
-               true
+               (zero? tilde) (compile-directive (subs s 1) (inc offset))
+               :else
                [(compile-raw-string (subs s 0 tilde) offset) [(subs s tilde) (+ tilde offset)]]))))
        [format-str 0])))))
 
@@ -3051,6 +3051,7 @@ nil
   format-in can be either a control string or a previously compiled format."
   {:added "1.2"}
   [format-in]
+  nil
   `(let [format-in# ~format-in
          cf# (if (string? format-in#) (-cached-compile-impl format-in#) format-in#)]
      (fn [& args#]
@@ -3201,7 +3202,7 @@ nil
 (defn- pprint-simple-default [obj]
   (cond
     ;; bloats binary
-    #_(.isArray (class obj)) #_(pprint-array obj)
+    (.isArray (class obj)) (pprint-array obj)
     (and *print-suppress-namespaces* (symbol? obj)) (print (name obj))
     :else (pr obj)))
 
@@ -3215,9 +3216,8 @@ nil
 (use-method simple-dispatch clojure.lang.ISeq pprint-list)
 (use-method simple-dispatch clojure.lang.IPersistentVector pprint-vector)
 (use-method simple-dispatch clojure.lang.IPersistentMap pprint-map)
-;; this one bloats
-#_(use-method simple-dispatch clojure.lang.IPersistentSet pprint-set)
-#_(use-method simple-dispatch clojure.lang.PersistentQueue pprint-pqueue)
+(use-method simple-dispatch clojure.lang.IPersistentSet pprint-set)
+(use-method simple-dispatch clojure.lang.PersistentQueue pprint-pqueue)
 (use-method simple-dispatch clojure.lang.Var pprint-simple-default)
 (use-method simple-dispatch clojure.lang.IDeref pprint-ideref)
 (use-method simple-dispatch nil pr)
