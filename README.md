@@ -21,3 +21,5 @@ Yup: all triggered by `compile-format`.
 => `(struct compiled-directive nil #_((:generator-fn def) params offset) def params offset)`
 This is ok: `(struct compiled-directive nil #_((:generator-fn def) params offset) nil #_def nil #_params nil #_offset)`
 Not ok: `(struct compiled-directive ((:generator-fn def) params offset) nil #_def nil #_params nil #_offset)` 
+Ok: `(struct compiled-directive (:foo #_(:generator-fn def) params offset) nil #_def nil #_params nil #_offset)`
+Problem seems to be in referring to `def`.

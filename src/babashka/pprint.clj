@@ -2834,7 +2834,7 @@ nil
       (format-error "Format string ended in the middle of a directive" offset))
     (if (not def)
       (format-error (str "Directive \"" directive "\" is undefined") offset))
-    [(struct compiled-directive ((:generator-fn def) params offset) nil #_def nil #_params nil #_offset)
+    [(struct compiled-directive (:foo #_(:generator-fn def) params offset) nil #_def nil #_params nil #_offset)
      (let [remainder (subs rest 1)
            offset (inc offset)
            trim? (and (= \newline (:directive def))
