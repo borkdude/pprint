@@ -6,6 +6,15 @@ Run `script/graal-test` to compile a `hello-world` binary and inspect the size.
 
 The size should not be much bigger than 8-10MB, but by compiling with clojure.pprint as it, the binary becomes around 27-30MB.
 
+## Tl;dr version
+
+`table-ize` uses `find-var` which tends to bloat GraalVM native images.
+
+The `find-var` can be avoided by making `write-option-table` a table of keywords to vars.
+If we do that, the binary ends up being only 10MB and GraalVM memory usage during compilation is reduced significantly.
+
+## Longer version
+
 Identified paths that bloat the binary:
 
 - Line 3204: `(.isArray (class obj)) (pprint-array obj)` (only the `pprint-array` triggers it)
@@ -39,3 +48,5 @@ Turns out it's `table-ize`. And there we have it... `find-var`!!!
                    #(when-let [v (get t (key %))] [(find-var v) (val %)])
                    m)))
 ``` 
+
+The `find-var` can be avoided by making `write-option-table` a table of keywords to vars.

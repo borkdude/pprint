@@ -824,22 +824,21 @@ radix specifier is in the form #XXr where XX is the decimal value of *print-base
 
 (def ^{:private true} write-option-table
   {;:array            *print-array*
-   :base             'babashka.pprint/*print-base*,
+   :base             #'babashka.pprint/*print-base*
    ;;:case             *print-case*,
-   :circle           'babashka.pprint/*print-circle*,
+   :circle           #'babashka.pprint/*print-circle*
    ;;:escape           *print-escape*,
    ;;:gensym           *print-gensym*,
-   :length           'clojure.core/*print-length*,
-   :level            'clojure.core/*print-level*,
-   :lines            'babashka.pprint/*print-lines*,
-   :miser-width      'babashka.pprint/*print-miser-width*,
-   :dispatch         'babashka.pprint/*print-pprint-dispatch*,
-   :pretty           'babashka.pprint/*print-pretty*,
-   :radix            'babashka.pprint/*print-radix*,
-   :readably         'clojure.core/*print-readably*,
-   :right-margin     'babashka.pprint/*print-right-margin*,
-   :suppress-namespaces 'babashka.pprint/*print-suppress-namespaces*})
-
+   :length            #'clojure.core/*print-length*
+   :level             #'clojure.core/*print-level*
+   :lines             #'babashka.pprint/*print-lines*
+   :miser-width       #'babashka.pprint/*print-miser-width*
+   :dispatch          #'babashka.pprint/*print-pprint-dispatch*
+   :pretty            #'babashka.pprint/*print-pretty*
+   :radix             #'babashka.pprint/*print-radix*
+   :readably          #'clojure.core/*print-readably*
+   :right-margin      #'babashka.pprint/*print-right-margin*
+   :suppress-namespaces #'babashka.pprint/*print-suppress-namespaces*})
 
 (defmacro ^{:private true} binding-map [amap & body]
   (let []
@@ -850,9 +849,10 @@ radix specifier is in the form #XXr where XX is the decimal value of *print-base
          (finally
            (. clojure.lang.Var (popThreadBindings)))))))
 
-(defn- table-ize [t m]
+(defn- table-ize [table m]
   (apply hash-map (mapcat
-                   #(when-let [v (get t (key %))] [(find-var v) (val %)])
+                   #(when-let [v (get table (key %))]
+                      [v (val %)])
                    m)))
 
 (defn- pretty-writer?
@@ -930,20 +930,20 @@ radix specifier is in the form #XXr where XX is the decimal value of *print-base
   (let [options (merge {:stream true} (apply hash-map kw-args))]
     (binding-map (table-ize write-option-table options)
                  (binding-map (if (or (not (= *print-base* 10)) *print-radix*) {#'pr pr-with-base} {})
-                              #_(let [optval (if (contains? options :stream)
-                                               (:stream options)
-                                               true)
-                                      base-writer (condp = optval
-                                                    nil (java.io.StringWriter.)
-                                                    true *out*
-                                                    optval)]
-                                  (if *print-pretty*
-                                    (with-pretty-writer base-writer
-                                      (write-out object))
-                                    (binding [*out* base-writer]
-                                      (pr object)))
-                                  (if (nil? optval)
-                                    (.toString ^java.io.StringWriter base-writer)))))))
+                              (let [optval (if (contains? options :stream)
+                                             (:stream options)
+                                             true)
+                                    base-writer (condp = optval
+                                                  nil (java.io.StringWriter.)
+                                                  true *out*
+                                                  optval)]
+                                (if *print-pretty*
+                                  (with-pretty-writer base-writer
+                                    (write-out object))
+                                  (binding [*out* base-writer]
+                                    (pr object)))
+                                (if (nil? optval)
+                                  (.toString ^java.io.StringWriter base-writer)))))))
 
 
 (defn pprint
@@ -966,7 +966,7 @@ radix specifier is in the form #XXr where XX is the decimal value of *print-base
   {:added "1.2"}
   [] `(pprint *1))
 
-#_(defn set-pprint-dispatch
+(defn set-pprint-dispatch
   "Set the pretty print dispatch function to a function matching (fn [obj] ...)
   where obj is the object to pretty print. That function will be called with *out* set
   to a pretty printing writer to which it should do its printing.
@@ -2443,41 +2443,41 @@ nil
      directive-table (hash-map ~@(mapcat process-directive-table-element directives))))
 
 (defdirectives
-  #_(\A
+  (\A
    [ :mincol [0 Integer] :colinc [1 Integer] :minpad [0 Integer] :padchar [\space Character] ]
    #{ :at :colon :both} {}
    #(format-ascii print-str %1 %2 %3))
 
-  #_(\S
+  (\S
    [ :mincol [0 Integer] :colinc [1 Integer] :minpad [0 Integer] :padchar [\space Character] ]
    #{ :at :colon :both} {}
    #(format-ascii pr-str %1 %2 %3))
 
-  #_(\D
+  (\D
    [ :mincol [0 Integer] :padchar [\space Character] :commachar [\, Character]
     :commainterval [ 3 Integer]]
    #{ :at :colon :both } {}
    #(format-integer 10 %1 %2 %3))
 
-  #_(\B
+  (\B
    [ :mincol [0 Integer] :padchar [\space Character] :commachar [\, Character]
     :commainterval [ 3 Integer]]
    #{ :at :colon :both } {}
    #(format-integer 2 %1 %2 %3))
 
-  #_(\O
+  (\O
    [ :mincol [0 Integer] :padchar [\space Character] :commachar [\, Character]
     :commainterval [ 3 Integer]]
    #{ :at :colon :both } {}
    #(format-integer 8 %1 %2 %3))
 
-  #_(\X
+  (\X
    [ :mincol [0 Integer] :padchar [\space Character] :commachar [\, Character]
     :commainterval [ 3 Integer]]
    #{ :at :colon :both } {}
    #(format-integer 16 %1 %2 %3))
 
-  #_(\R
+  (\R
    [:base [nil Integer] :mincol [0 Integer] :padchar [\space Character] :commachar [\, Character]
     :commainterval [ 3 Integer]]
    #{ :at :colon :both } {}
@@ -2489,7 +2489,7 @@ nil
        (:colon params)            #(format-ordinal-english %1 %2 %3)
        true                       #(format-cardinal-english %1 %2 %3))))
 
-  #_(\P
+  (\P
    [ ]
    #{ :at :colon :both } {}
    (fn [params navigator offsets]
@@ -2499,7 +2499,7 @@ nil
        (print (if (= arg 1) (first strs) (second strs)))
        navigator)))
 
-  #_(\C
+  (\C
    [:char-format [nil Character]]
    #{ :at :colon :both } {}
    (cond
@@ -2507,32 +2507,32 @@ nil
      (:at params) readable-character
      :else plain-character))
 
-  #_(\F
+  (\F
    [ :w [nil Integer] :d [nil Integer] :k [0 Integer] :overflowchar [nil Character]
     :padchar [\space Character] ]
    #{ :at } {}
    fixed-float)
 
-  #_(\E
+  (\E
    [ :w [nil Integer] :d [nil Integer] :e [nil Integer] :k [1 Integer]
     :overflowchar [nil Character] :padchar [\space Character]
     :exponentchar [nil Character] ]
    #{ :at } {}
    exponential-float)
 
-  #_(\G
+  (\G
    [ :w [nil Integer] :d [nil Integer] :e [nil Integer] :k [1 Integer]
     :overflowchar [nil Character] :padchar [\space Character]
     :exponentchar [nil Character] ]
    #{ :at } {}
    general-float)
 
-  #_(\$
+  (\$
    [ :d [2 Integer] :n [1 Integer] :w [0 Integer] :padchar [\space Character]]
    #{ :at :colon :both} {}
    dollar-float)
 
-  #_(\%
+  (\%
    [ :count [1 Integer] ]
    #{ } {}
    (fn [params arg-navigator offsets]
@@ -2540,7 +2540,7 @@ nil
        (prn))
      arg-navigator))
 
-  #_(\&
+  (\&
    [ :count [1 Integer] ]
    #{ :pretty } {}
    (fn [params arg-navigator offsets]
@@ -2550,7 +2550,7 @@ nil
          (prn)))
      arg-navigator))
 
-  #_(\|
+  (\|
    [ :count [1 Integer] ]
    #{ } {}
    (fn [params arg-navigator offsets]
@@ -2558,7 +2558,7 @@ nil
        (print \formfeed))
      arg-navigator))
 
-  #_(\~
+  (\~
    [ :n [1 Integer] ]
    #{ } {}
    (fn [params arg-navigator offsets]
@@ -2566,7 +2566,7 @@ nil
        (print (apply str (repeat n \~)))
        arg-navigator)))
 
-  #_(\newline ;; Whitespace supression is handled in the compilation loop
+  (\newline ;; Whitespace supression is handled in the compilation loop
    [ ]
    #{:colon :at} {}
    (fn [params arg-navigator offsets]
@@ -2574,14 +2574,14 @@ nil
        (prn))
      arg-navigator))
 
-  #_(\T
+  (\T
    [ :colnum [1 Integer] :colinc [1 Integer] ]
    #{ :at :pretty } {}
    (if (:at params)
      #(relative-tabulation %1 %2 %3)
      #(absolute-tabulation %1 %2 %3)))
 
-  #_(\*
+  (\*
    [ :n [nil Integer] ]
    #{ :colon :at } {}
    (if (:at params)
@@ -2592,7 +2592,7 @@ nil
        (let [n (or (:n params) 1)] ; whereas ~* and ~:* have a default n = 1
          (relative-reposition navigator (if (:colon params) (- n) n))))))
 
-  #_(\?
+  (\?
    [ ]
    #{ :at } {}
    (if (:at params)
@@ -2607,7 +2607,7 @@ nil
          navigator))))
 
 
-  #_(\(
+  (\(
    [ ]
    #{ :colon :at :both} { :right \), :allows-separator nil, :else nil }
    (let [mod-case-writer (cond
@@ -2624,9 +2624,9 @@ nil
                            downcase-writer)]
      #(modify-case mod-case-writer %1 %2 %3)))
 
-  #_(\) [] #{} {} nil)
+  (\) [] #{} {} nil)
 
-  #_(\[
+  (\[
    [ :selector [nil Integer] ]
    #{ :colon :at } { :right \], :allows-separator true, :else :last }
    (cond
@@ -2642,12 +2642,12 @@ nil
   (\; [:min-remaining [nil Integer] :max-columns [nil Integer]]
    #{ :colon } { :separator true } nil)
 
-  #_(\] [] #{} {} nil)
+  (\] [] #{} {} nil)
 
   (\{
    [ :max-iterations [nil Integer] ]
    #{ :colon :at :both} { :right \}, :allows-separator false }
-   nil #_(cond
+   (cond
      (and (:at params) (:colon params))
      iterate-main-sublists
 
@@ -2666,14 +2666,14 @@ nil
   (\<
    [:mincol [0 Integer] :colinc [1 Integer] :minpad [0 Integer] :padchar [\space Character]]
    #{:colon :at :both :pretty} { :right \>, :allows-separator true, :else :first }
-   nil #_logical-block-or-justify)
+   logical-block-or-justify)
 
   (\> [] #{:colon} {} nil)
 
   ;; TODO: detect errors in cases where colon not allowed
   (\^ [:arg1 [nil Integer] :arg2 [nil Integer] :arg3 [nil Integer]]
    #{:colon} {}
-   nil #_(fn [params navigator offsets]
+   (fn [params navigator offsets]
      (let [arg1 (:arg1 params)
            arg2 (:arg2 params)
            arg3 (:arg3 params)
@@ -2707,7 +2707,7 @@ nil
              [:up-arrow navigator]
              navigator))))
      (fn [params navigator offsets]
-       #_(let [[arg navigator] (next-arg navigator)]
+       (let [[arg navigator] (next-arg navigator)]
          (if (write-out arg)
            [:up-arrow navigator]
            navigator)))))
@@ -3204,7 +3204,6 @@ nil
 
 (defn- pprint-simple-default [obj]
   (cond
-    ;; bloats binary
     (.isArray (class obj)) (pprint-array obj)
     (and *print-suppress-namespaces* (symbol? obj)) (print (name obj))
     :else (pr obj)))
@@ -3530,10 +3529,7 @@ nil
 (use-method code-dispatch nil pr)
 (use-method code-dispatch :default pprint-simple-default)
 
-(let [old-meta (meta #'*print-pprint-dispatch*)]
-  (alter-var-root #'*print-pprint-dispatch* (constantly simple-dispatch))
-  (alter-meta! #'*print-pprint-dispatch* (constantly old-meta)))
-#_(set-pprint-dispatch simple-dispatch)
+(set-pprint-dispatch simple-dispatch)
 
 ;;; For testing
 (comment
