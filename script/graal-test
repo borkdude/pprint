@@ -2,7 +2,9 @@
 
 set -eo pipefail
 
+rm -rf classes
 mkdir -p classes
+
 clojure -J-Dclojure.compiler.direct-linking=true \
         -J-Dborkdude.dynaload.aot=true \
         -A:graal-test -e "(compile 'hello-world.core)"
