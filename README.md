@@ -13,6 +13,27 @@ The size should not be much bigger than 8-10MB (in my experience with similar li
 The `find-var` can be avoided by making `write-option-table` a table of keywords to vars.
 If we do that, the binary ends up being only 10MB and GraalVM memory usage during compilation is reduced significantly.
 
+TODO: make a JIRA.
+TBD: wrap `write-option-table` in `delay` since this is better for load time
+
+``` 
+;; with delay
+user=> (time (dotimes [i 100] (require '[babashka.pprint] :reload)))
+"Elapsed time: 21165.989 msecs"
+nil
+;; without delay
+user=> (time (dotimes [i 100] (require '[babashka.pprint] :reload)))
+"Elapsed time: 24007.1286 msecs"
+nil
+;; with delay
+user=> (time (dotimes [i 100] (require '[babashka.pprint] :reload)))
+"Elapsed time: 27414.7834 msecs"
+nil
+;; without delay
+user=> (time (dotimes [i 100] (require '[babashka.pprint] :reload)))
+"Elapsed time: 30943.7437 msecs"
+``` 
+
 ## Longer version
 
 Identified paths that bloat the binary:
