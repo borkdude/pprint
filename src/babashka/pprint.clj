@@ -930,20 +930,20 @@ radix specifier is in the form #XXr where XX is the decimal value of *print-base
   (let [options (merge {:stream true} (apply hash-map kw-args))]
     (binding-map (table-ize write-option-table options)
                  (binding-map (if (or (not (= *print-base* 10)) *print-radix*) {#'pr pr-with-base} {})
-                              (let [optval (if (contains? options :stream)
-                                             (:stream options)
-                                             true)
-                                    base-writer (condp = optval
-                                                  nil (java.io.StringWriter.)
-                                                  true *out*
-                                                  optval)]
-                                (if *print-pretty*
-                                  (with-pretty-writer base-writer
-                                    (write-out object))
-                                  (binding [*out* base-writer]
-                                    (pr object)))
-                                (if (nil? optval)
-                                  (.toString ^java.io.StringWriter base-writer)))))))
+                              #_(let [optval (if (contains? options :stream)
+                                               (:stream options)
+                                               true)
+                                      base-writer (condp = optval
+                                                    nil (java.io.StringWriter.)
+                                                    true *out*
+                                                    optval)]
+                                  (if *print-pretty*
+                                    (with-pretty-writer base-writer
+                                      (write-out object))
+                                    (binding [*out* base-writer]
+                                      (pr object)))
+                                  (if (nil? optval)
+                                    (.toString ^java.io.StringWriter base-writer)))))))
 
 
 (defn pprint
@@ -2443,35 +2443,35 @@ nil
      directive-table (hash-map ~@(mapcat process-directive-table-element directives))))
 
 (defdirectives
-  (\A
+  #_(\A
    [ :mincol [0 Integer] :colinc [1 Integer] :minpad [0 Integer] :padchar [\space Character] ]
    #{ :at :colon :both} {}
-   #_#(format-ascii print-str %1 %2 %3))
+   #(format-ascii print-str %1 %2 %3))
 
-  (\S
+  #_(\S
    [ :mincol [0 Integer] :colinc [1 Integer] :minpad [0 Integer] :padchar [\space Character] ]
    #{ :at :colon :both} {}
    #(format-ascii pr-str %1 %2 %3))
 
-  (\D
+  #_(\D
    [ :mincol [0 Integer] :padchar [\space Character] :commachar [\, Character]
     :commainterval [ 3 Integer]]
    #{ :at :colon :both } {}
    #(format-integer 10 %1 %2 %3))
 
-  (\B
+  #_(\B
    [ :mincol [0 Integer] :padchar [\space Character] :commachar [\, Character]
     :commainterval [ 3 Integer]]
    #{ :at :colon :both } {}
    #(format-integer 2 %1 %2 %3))
 
-  (\O
+  #_(\O
    [ :mincol [0 Integer] :padchar [\space Character] :commachar [\, Character]
     :commainterval [ 3 Integer]]
    #{ :at :colon :both } {}
    #(format-integer 8 %1 %2 %3))
 
-  (\X
+  #_(\X
    [ :mincol [0 Integer] :padchar [\space Character] :commachar [\, Character]
     :commainterval [ 3 Integer]]
    #{ :at :colon :both } {}
@@ -2647,7 +2647,7 @@ nil
   (\{
    [ :max-iterations [nil Integer] ]
    #{ :colon :at :both} { :right \}, :allows-separator false }
-   (cond
+   nil #_(cond
      (and (:at params) (:colon params))
      iterate-main-sublists
 
@@ -2666,14 +2666,14 @@ nil
   (\<
    [:mincol [0 Integer] :colinc [1 Integer] :minpad [0 Integer] :padchar [\space Character]]
    #{:colon :at :both :pretty} { :right \>, :allows-separator true, :else :first }
-   logical-block-or-justify)
+   nil #_logical-block-or-justify)
 
   (\> [] #{:colon} {} nil)
 
   ;; TODO: detect errors in cases where colon not allowed
   (\^ [:arg1 [nil Integer] :arg2 [nil Integer] :arg3 [nil Integer]]
    #{:colon} {}
-   (fn [params navigator offsets]
+   nil #_(fn [params navigator offsets]
      (let [arg1 (:arg1 params)
            arg2 (:arg2 params)
            arg3 (:arg3 params)
@@ -2707,7 +2707,7 @@ nil
              [:up-arrow navigator]
              navigator))))
      (fn [params navigator offsets]
-       (let [[arg navigator] (next-arg navigator)]
+       #_(let [[arg navigator] (next-arg navigator)]
          (if (write-out arg)
            [:up-arrow navigator]
            navigator)))))

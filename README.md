@@ -26,3 +26,16 @@ Problem seems to be in referring to `def`.
 In `process-directive-table-element` commenting out `generator-fn` helps:
 `(concat '(fn [ params offset]) nil #_generator-fn)` 
 So maybe there is one generator-fn triggering bloating.
+Commented out pretty much everything in `defdirectives`. Left with:
+``` 
+(apply (fn [& args] (even? (count args)))#_write arg bindings)
+```
+so it seems like the reference to `write` is causing bloat.
+In `write` commenting out the body doesn't solve the bloat, so maybe it's caused by `binding-map` or `tabl-ize`.
+Turns out it's `table-ize`. And there we have it... `find-var`!!!
+``` 
+(defn- table-ize [t m]
+  (apply hash-map (mapcat
+                   #(when-let [v (get t (key %))] [(find-var v) (val %)])
+                   m)))
+``` 
