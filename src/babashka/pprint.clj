@@ -2446,7 +2446,7 @@ nil
   (\A
    [ :mincol [0 Integer] :colinc [1 Integer] :minpad [0 Integer] :padchar [\space Character] ]
    #{ :at :colon :both} {}
-   #(format-ascii print-str %1 %2 %3))
+   #_#(format-ascii print-str %1 %2 %3))
 
   (\S
    [ :mincol [0 Integer] :colinc [1 Integer] :minpad [0 Integer] :padchar [\space Character] ]
@@ -2477,7 +2477,7 @@ nil
    #{ :at :colon :both } {}
    #(format-integer 16 %1 %2 %3))
 
-  (\R
+  #_(\R
    [:base [nil Integer] :mincol [0 Integer] :padchar [\space Character] :commachar [\, Character]
     :commainterval [ 3 Integer]]
    #{ :at :colon :both } {}
@@ -2489,7 +2489,7 @@ nil
        (:colon params)            #(format-ordinal-english %1 %2 %3)
        true                       #(format-cardinal-english %1 %2 %3))))
 
-  (\P
+  #_(\P
    [ ]
    #{ :at :colon :both } {}
    (fn [params navigator offsets]
@@ -2499,7 +2499,7 @@ nil
        (print (if (= arg 1) (first strs) (second strs)))
        navigator)))
 
-  (\C
+  #_(\C
    [:char-format [nil Character]]
    #{ :at :colon :both } {}
    (cond
@@ -2507,32 +2507,32 @@ nil
      (:at params) readable-character
      :else plain-character))
 
-  (\F
+  #_(\F
    [ :w [nil Integer] :d [nil Integer] :k [0 Integer] :overflowchar [nil Character]
     :padchar [\space Character] ]
    #{ :at } {}
    fixed-float)
 
-  (\E
+  #_(\E
    [ :w [nil Integer] :d [nil Integer] :e [nil Integer] :k [1 Integer]
     :overflowchar [nil Character] :padchar [\space Character]
     :exponentchar [nil Character] ]
    #{ :at } {}
    exponential-float)
 
-  (\G
+  #_(\G
    [ :w [nil Integer] :d [nil Integer] :e [nil Integer] :k [1 Integer]
     :overflowchar [nil Character] :padchar [\space Character]
     :exponentchar [nil Character] ]
    #{ :at } {}
    general-float)
 
-  (\$
+  #_(\$
    [ :d [2 Integer] :n [1 Integer] :w [0 Integer] :padchar [\space Character]]
    #{ :at :colon :both} {}
    dollar-float)
 
-  (\%
+  #_(\%
    [ :count [1 Integer] ]
    #{ } {}
    (fn [params arg-navigator offsets]
@@ -2540,7 +2540,7 @@ nil
        (prn))
      arg-navigator))
 
-  (\&
+  #_(\&
    [ :count [1 Integer] ]
    #{ :pretty } {}
    (fn [params arg-navigator offsets]
@@ -2550,7 +2550,7 @@ nil
          (prn)))
      arg-navigator))
 
-  (\|
+  #_(\|
    [ :count [1 Integer] ]
    #{ } {}
    (fn [params arg-navigator offsets]
@@ -2558,7 +2558,7 @@ nil
        (print \formfeed))
      arg-navigator))
 
-  (\~
+  #_(\~
    [ :n [1 Integer] ]
    #{ } {}
    (fn [params arg-navigator offsets]
@@ -2566,7 +2566,7 @@ nil
        (print (apply str (repeat n \~)))
        arg-navigator)))
 
-  (\newline ;; Whitespace supression is handled in the compilation loop
+  #_(\newline ;; Whitespace supression is handled in the compilation loop
    [ ]
    #{:colon :at} {}
    (fn [params arg-navigator offsets]
@@ -2574,14 +2574,14 @@ nil
        (prn))
      arg-navigator))
 
-  (\T
+  #_(\T
    [ :colnum [1 Integer] :colinc [1 Integer] ]
    #{ :at :pretty } {}
    (if (:at params)
      #(relative-tabulation %1 %2 %3)
      #(absolute-tabulation %1 %2 %3)))
 
-  (\*
+  #_(\*
    [ :n [nil Integer] ]
    #{ :colon :at } {}
    (if (:at params)
@@ -2592,7 +2592,7 @@ nil
        (let [n (or (:n params) 1)] ; whereas ~* and ~:* have a default n = 1
          (relative-reposition navigator (if (:colon params) (- n) n))))))
 
-  (\?
+  #_(\?
    [ ]
    #{ :at } {}
    (if (:at params)
@@ -2607,7 +2607,7 @@ nil
          navigator))))
 
 
-  (\(
+  #_(\(
    [ ]
    #{ :colon :at :both} { :right \), :allows-separator nil, :else nil }
    (let [mod-case-writer (cond
@@ -2624,9 +2624,9 @@ nil
                            downcase-writer)]
      #(modify-case mod-case-writer %1 %2 %3)))
 
-  (\) [] #{} {} nil)
+  #_(\) [] #{} {} nil)
 
-  (\[
+  #_(\[
    [ :selector [nil Integer] ]
    #{ :colon :at } { :right \], :allows-separator true, :else :last }
    (cond
@@ -2642,7 +2642,7 @@ nil
   (\; [:min-remaining [nil Integer] :max-columns [nil Integer]]
    #{ :colon } { :separator true } nil)
 
-  (\] [] #{} {} nil)
+  #_(\] [] #{} {} nil)
 
   (\{
    [ :max-iterations [nil Integer] ]
@@ -2828,8 +2828,10 @@ nil
   (let [[raw-params [rest offset]] (extract-params s offset)
         [_ [rest offset flags]] (extract-flags rest offset)
         directive (first rest)
-        _ (prn directive)
-        def nil #_(get directive-table (Character/toUpperCase ^Character directive))
+        def (get directive-table (Character/toUpperCase ^Character directive)
+                 (fn [& args]
+                   ;; fallback
+                     ))
         params (if def (map-params def (map translate-param raw-params) flags offset))]
     (if (not directive)
       (format-error "Format string ended in the middle of a directive" offset))

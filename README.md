@@ -23,3 +23,6 @@ This is ok: `(struct compiled-directive nil #_((:generator-fn def) params offset
 Not ok: `(struct compiled-directive ((:generator-fn def) params offset) nil #_def nil #_params nil #_offset)` 
 Ok: `(struct compiled-directive (:foo #_(:generator-fn def) params offset) nil #_def nil #_params nil #_offset)`
 Problem seems to be in referring to `def`.
+In `process-directive-table-element` commenting out `generator-fn` helps:
+`(concat '(fn [ params offset]) nil #_generator-fn)` 
+So maybe there is one generator-fn triggering bloating.
