@@ -1087,7 +1087,7 @@ radix specifier is in the form #XXr where XX is the decimal value of *print-base
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- pll-mod-body [var-sym body]
-  #_(letfn [(inner [form]
+  (letfn [(inner [form]
             (if (seq? form)
               (let [form (macroexpand form)]
                 (condp = (first form)
@@ -3215,10 +3215,11 @@ nil
 (use-method simple-dispatch clojure.lang.ISeq pprint-list)
 (use-method simple-dispatch clojure.lang.IPersistentVector pprint-vector)
 (use-method simple-dispatch clojure.lang.IPersistentMap pprint-map)
+;; this one bloats
 #_(use-method simple-dispatch clojure.lang.IPersistentSet pprint-set)
 #_(use-method simple-dispatch clojure.lang.PersistentQueue pprint-pqueue)
-#_(use-method simple-dispatch clojure.lang.Var pprint-simple-default)
-#_(use-method simple-dispatch clojure.lang.IDeref pprint-ideref)
+(use-method simple-dispatch clojure.lang.Var pprint-simple-default)
+(use-method simple-dispatch clojure.lang.IDeref pprint-ideref)
 (use-method simple-dispatch nil pr)
 (use-method simple-dispatch :default pprint-simple-default)
 
