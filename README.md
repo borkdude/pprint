@@ -34,6 +34,8 @@ user=> (time (dotimes [i 100] (require '[babashka.pprint] :reload)))
 "Elapsed time: 30943.7437 msecs"
 ``` 
 
+TODO: also compare timings from vanilla core, vars and delay + vars
+
 ## Longer version
 
 Identified paths that bloat the binary:
